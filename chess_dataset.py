@@ -41,7 +41,7 @@ class ChessDataset(Dataset):
             canon_state = self.get_canonical_state(board, board.turn)
             action = ChessEnv.move_to_action(move)
 
-            states.append(canon_state)
+            states.append((canon_state, board.turn))
             actions.append(action)
             results.append(result)
             board.push(move)
@@ -67,17 +67,17 @@ class ChessDataset(Dataset):
         return self.data[idx]
 
 # Maybe useful sometime
-def sequence_game_data(states, actions, seqlen = 20):
-    state_deq = deque([np.zeros(64) for i in seqlen],maxlen=seqlen)
-    action_deq = deque([np.zeros(4672) for i in seqlen],maxlen=seqlen)
+# def sequence_game_data(states, actions, seqlen = 20):
+#     state_deq = deque([np.zeros(64) for i in seqlen],maxlen=seqlen)
+#     action_deq = deque([np.zeros(4672) for i in seqlen],maxlen=seqlen)
 
-    state_seqs = []
-    action_seqs = []
-    for state, action in zip(states,actions):
-        state_deq.append(state)
-        action_deq.append(action)
+#     state_seqs = []
+#     action_seqs = []
+#     for state, action in zip(states,actions):
+#         state_deq.append(state)
+#         action_deq.append(action)
 
-        state_seqs.append(np.array(state_deq))
-        action_seqs.append(np.array(action_deq))
+#         state_seqs.append(np.array(state_deq))
+#         action_seqs.append(np.array(action_deq))
 
-    return state_seqs, action_seqs
+#     return state_seqs, action_seqs
