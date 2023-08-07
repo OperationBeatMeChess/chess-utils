@@ -15,12 +15,12 @@ class ChessDataset(Dataset):
         self.data = self.generate_pgn_data()
 
     def generate_pgn_data(self):
-        """ Return a list of tuples with (state, action, result) """
+        """ Return a list of tuples with (state, turn,  action, result) """
         data = []
 
         while (game := chess.pgn.read_game(self.pgn_file)) is not None:
-            state_maps, actions, results = self.get_game_data(game)
-            game_data = list(zip(state_maps, actions, results))
+            state_maps, turns, actions, results = self.get_game_data(game)
+            game_data = list(zip(state_maps, turns, actions, results))
             data.extend(game_data)
 
         return data
