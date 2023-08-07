@@ -47,7 +47,7 @@ class ChessDataset(Dataset):
             actions.append(action)
             results.append(result)
             board.push(move)
-        return states, actions, results
+        return states, turns, actions, results
      
     def get_canonical_state(self, board, turn):
         state = ChessEnv.get_piece_configuration(board)
