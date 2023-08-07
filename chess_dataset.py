@@ -27,12 +27,13 @@ class ChessDataset(Dataset):
 
     def get_game_data(self, game):
         """
-        Generate a game's training data, where X = board_state and Y1 = move taken, Y2 = result.
+        Generate a game's training data, where X = board_state and Y1 = action taken, Y2 = result.
         A move is given by [from_square, to_square, promotion, drop]
         """
         states = []
         actions = []
         results = []
+        turns = []
 
         board = game.board()
         result = game.headers['Result']
@@ -41,7 +42,8 @@ class ChessDataset(Dataset):
             canon_state = self.get_canonical_state(board, board.turn)
             action = ChessEnv.move_to_action(move)
 
-            states.append((canon_state, board.turn))
+            states.append(canon_state)
+            turns.append(board.turn)
             actions.append(action)
             results.append(result)
             board.push(move)
