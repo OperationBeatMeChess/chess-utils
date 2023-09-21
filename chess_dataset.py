@@ -37,6 +37,7 @@ class ChessDataset(Dataset):
         board = game.board()
         result = game.headers['Result']
         result = self.result_to_number(result)
+        
         for move in game.mainline_moves():
             canon_state = self.get_canonical_state(board, board.turn)
             action = ChessEnv.move_to_action(move)
@@ -45,7 +46,9 @@ class ChessDataset(Dataset):
             actions.append(action)
             results.append(result*-1 if board.turn==0 else result) # flip value to match canonical state
             board.push(move)
+        
         if game.errors: print(game.errors, game.headers)
+        
         return states, actions, results
      
     def get_canonical_state(self, board, turn):
