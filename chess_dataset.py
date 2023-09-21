@@ -15,12 +15,12 @@ class ChessDataset(Dataset):
         self.data = self.generate_pgn_data()
 
     def generate_pgn_data(self):
-        """ Return a list of tuples with (state, turn,  action, result) """
+        """ Return a list of tuples with (state, action, result) """
         data = []
         
         while (game := chess.pgn.read_game(self.pgn_file)) is not None:
-            state_maps, turns, actions, results = self.get_game_data(game)
-            game_data = list(zip(state_maps, turns, actions, results))
+            state_maps, actions, results = self.get_game_data(game)
+            game_data = list(zip(state_maps, actions, results))
             data.extend(game_data)
 
         return data
@@ -33,7 +33,6 @@ class ChessDataset(Dataset):
         states = []
         actions = []
         results = []
-        turns = []
 
         board = game.board()
         result = game.headers['Result']
@@ -43,12 +42,11 @@ class ChessDataset(Dataset):
             action = ChessEnv.move_to_action(move)
 
             states.append(canon_state)
-            turns.append(board.turn)
             actions.append(action)
             results.append(result*-1 if board.turn==0 else result) # flip value to match canonical state
             board.push(move)
         if game.errors: print(game.errors, game.headers)
-        return states, turns, actions, results
+        return states, actions, results
      
     def get_canonical_state(self, board, turn):
         state = ChessEnv.get_piece_configuration(board)
