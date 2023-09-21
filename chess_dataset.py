@@ -17,7 +17,7 @@ class ChessDataset(Dataset):
     def generate_pgn_data(self):
         """ Return a list of tuples with (state, turn,  action, result) """
         data = []
-
+        
         while (game := chess.pgn.read_game(self.pgn_file)) is not None:
             state_maps, turns, actions, results = self.get_game_data(game)
             game_data = list(zip(state_maps, turns, actions, results))
@@ -45,8 +45,9 @@ class ChessDataset(Dataset):
             states.append(canon_state)
             turns.append(board.turn)
             actions.append(action)
-            results.append(result)
+            results.append(result*-1 if board.turn==0 else result) # flip value to match canonical state
             board.push(move)
+        if game.errors: print(game.errors, game.headers)
         return states, turns, actions, results
      
     def get_canonical_state(self, board, turn):
@@ -55,12 +56,9 @@ class ChessDataset(Dataset):
         return state
 
     def result_to_number(self, result):
-        if result == "1-0":
-            return 1
-        if result == "0-1":
-            return -1
-        else:
-            return 0
+        if result == "1-0": return 1
+        if result == "0-1": return -1
+        else: return 0
 
     def __len__(self):
         return len(self.data)
