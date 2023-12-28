@@ -2,6 +2,7 @@ from collections import deque
 import chess
 import chess.pgn
 import numpy as np
+import torch
 
 from torch.utils.data import Dataset, DataLoader
 
@@ -9,20 +10,20 @@ from adversarial_gym.chess_env import ChessEnv
 
 
 class ChessDataset(Dataset):
-    def __init__(self, pgn_file):
+    def __init__(self, pgn_files):
         super().__init__()
-        self.pgn_file = open(pgn_file)
+        self.pgn_files = pgn_files
         self.data = self.generate_pgn_data()
 
     def generate_pgn_data(self):
         """ Return a list of tuples with (state, action, result) """
         data = []
-        
-        while (game := chess.pgn.read_game(self.pgn_file)) is not None:
-            state_maps, actions, results = self.get_game_data(game)
-            game_data = list(zip(state_maps, actions, results))
-            data.extend(game_data)
-
+        for pgn_file in self.pgn_files:
+            with open(pgn_file) as pgn:
+                while (game := chess.pgn.read_game(pgn)) is not None:
+                    state_maps, actions, results = self.get_game_data(game)
+                    game_data = list(zip(state_maps, actions, results))
+                    data.extend(game_data)
         return data
 
     def get_game_data(self, game):
@@ -64,8 +65,22 @@ class ChessDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+    # def __getitem__(self, idx):
+    #     return self.data[idx]
     def __getitem__(self, idx):
-        return self.data[idx]
+        state, action, result = self.data[idx]
+        action_probs = create_sparse_vector({action: 1.0})
+        action_probs = torch.tensor(action_probs, dtype=torch.float32)
+
+        return state, action_probs, result
+
+def create_sparse_vector(action_probs):
+    # Initialize a list of zeros for all possible actions
+    sparse_vector = [0.] * 4672
+    
+    for action, prob in action_probs.items():
+        sparse_vector[action] = prob
+    return sparse_vector
 
 # Maybe useful sometime
 # def sequence_game_data(states, actions, seqlen = 20):
